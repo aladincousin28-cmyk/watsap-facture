@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, Platform, Dimensions } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -44,6 +44,10 @@ const NAV_LIGHT = {
   },
 };
 
+const navBarHeight = Platform.OS === 'android'
+  ? Math.max(0, (Dimensions.get('screen').height - Dimensions.get('window').height))
+  : 0;
+
 export default function App() {
   const [themeMode, setThemeMode] = useState(getTheme());
   const [lang, setLang] = useState(getCurrentLang());
@@ -66,7 +70,7 @@ export default function App() {
             },
             tabBarActiveTintColor: C.gold,
             tabBarInactiveTintColor: C.muted,
-            tabBarStyle: { backgroundColor: C.card, borderTopColor: C.cardBorder, borderTopWidth: 1, height: 64, paddingBottom: 8, paddingTop: 8 },
+            tabBarStyle: { backgroundColor: C.card, borderTopColor: C.cardBorder, borderTopWidth: 1, height: 56 + navBarHeight, paddingBottom: navBarHeight + 4, paddingTop: 6 },
             tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
             headerStyle: { backgroundColor: C.surface, shadowColor: 'transparent', elevation: 0 },
             headerTintColor: C.gold,
