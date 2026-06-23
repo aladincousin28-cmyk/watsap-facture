@@ -1,0 +1,7 @@
+backend/__pycache__/
+backend/invoices.db
+backend/.env
+mobile/node_modules/
+mobile/.expo/
+*.pyc
+__pycache__/

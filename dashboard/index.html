@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Watsap Facture">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0f1a">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icons/favicon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
+<title>Watsap Facture</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI',sans-serif;background:#0f0f1a;color:#e0e0e0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #C9A24C;flex-wrap:wrap;gap:10px}
+.header h1{color:#C9A24C;font-size:20px;font-weight:700}
+.header .sub{color:#888;font-size:13px}
+.header .sub a{color:#C9A24C;text-decoration:none;cursor:pointer}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:#1a1a2e;border-radius:12px;padding:18px;border:1px solid #2a2a3e}
+.stat-card .l{color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.stat-card .v{color:#fff;font-size:26px;font-weight:700;margin-top:6px}
+.stat-card .v.gold{color:#C9A24C}
+.stat-card .v.green{color:#4ade80}
+.stat-card .v.red{color:#f87171}
+.btn{padding:8px 16px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-gold{background:#C9A24C;color:#1a1a2e}
+.btn-gold:hover{background:#b8912e}
+.btn-outline{background:transparent;border:1px solid #2a2a3e;color:#e0e0e0}
+.btn-outline:hover{background:#2a2a3e}
+.btn-green{background:#4ade80;color:#1a1a2e}
+.btn-green:hover{background:#22c55e}
+.btn-sm{padding:5px 10px;font-size:11px}
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{padding:9px 12px;border-radius:8px;border:1px solid #2a2a3e;background:#1a1a2e;color:#e0e0e0;font-size:13px;outline:none}
+.toolbar input:focus,.toolbar select:focus{border-color:#C9A24C}
+.tabs{display:flex;gap:4px;margin-bottom:16px}
+.tab{padding:8px 18px;border-radius:8px 8px 0 0;background:#1a1a2e;border:1px solid #2a2a3e;border-bottom:none;color:#888;font-size:13px;cursor:pointer;font-weight:600}
+.tab.active{background:#C9A24C;color:#1a1a2e}
+table{width:100%;border-collapse:collapse;background:#1a1a2e;border-radius:12px;overflow:hidden;border:1px solid #2a2a3e}
+th{background:#16213e;color:#C9A24C;padding:12px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+td{padding:11px 14px;border-bottom:1px solid #2a2a3e;font-size:13px}
+tr:hover{background:#1e1e36}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.badge.pending{background:#fef3c7;color:#92400e}
+.badge.paid{background:#d1fae5;color:#065f46}
+.badge.recurring{background:#dbeafe;color:#1e40af}
+.empty{text-align:center;padding:50px;color:#666;font-size:15px}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center}
+.modal{background:#1a1a2e;border-radius:16px;padding:30px;width:90%;max-width:480px;border:1px solid #2a2a3e}
+.modal h2{color:#C9A24C;margin-bottom:20px;font-size:18px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;color:#888;font-size:12px;margin-bottom:4px}
+.form-group input{padding:10px 12px;border-radius:8px;border:1px solid #2a2a3e;background:#0f0f1a;color:#e0e0e0;font-size:14px;outline:none;width:100%}
+.form-group input:focus{border-color:#C9A24C}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+@media(max-width:600px){
+  .header{flex-direction:column;text-align:center}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .form-row{grid-template-columns:1fr}
+  td,th{padding:8px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><h1>Watsap Facture</h1><div class="sub">Tableau de bord · <a onclick="loadData()">⟳ Actualiser</a></div></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="btn btn-outline" onclick="showSettings()" style="font-size:18px;padding:4px 12px">⚙</button>
+    <button class="btn btn-gold" onclick="showModal('new')">+ Nouvelle facture</button>
+  </div>
+</div>
+<div class="container">
+  <div class="stats" id="stats"></div>
+  <div class="tabs">
+    <div class="tab active" data-tab="all" onclick="switchTab('all')">Toutes</div>
+    <div class="tab" data-tab="pending" onclick="switchTab('pending')">En attente</div>
+    <div class="tab" data-tab="paid" onclick="switchTab('paid')">Payées</div>
+    <div class="tab" data-tab="recurring" onclick="switchTab('recurring')">Récurrentes</div>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Rechercher..." oninput="loadData()" style="flex:1;min-width:160px">
+  </div>
+  <div id="tableContainer"></div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modalTitle">Nouvelle facture</h2>
+    <div class="form-group"><label>Nom du client</label><input id="fName" placeholder="Ahmed Ben Salem"></div>
+    <div class="form-group"><label>Téléphone</label><input id="fPhone" placeholder="21623433052"></div>
+    <div class="form-group"><label>Service</label><input id="fService" placeholder="Ex: تصميم موقع"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Montant (TND)</label><input id="fAmount" type="number" placeholder="150"></div>
+      <div class="form-group"><label>Récurrence</label>
+        <select id="fRecurring" style="padding:10px 12px;border-radius:8px;border:1px solid #2a2a3e;background:#0f0f1a;color:#e0e0e0;font-size:14px;width:100%;outline:none">
+          <option value="">Une seule fois</option>
+          <option value="7">Chaque semaine</option>
+          <option value="15">Chaque 15 jours</option>
+          <option value="30">Chaque mois</option>
+          <option value="90">Chaque 3 mois</option>
+          <option value="365">Chaque année</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideModal()">Annuler</button>
+      <button class="btn btn-gold" onclick="createInvoice()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let API = localStorage.getItem('watsap_api') || window.location.origin;
+let invoices = [], currentTab = 'all';
+
+function setApiUrl(url) {
+  API = url;
+  localStorage.setItem('watsap_api', url);
+}
+
+async function loadData(){await Promise.all([loadStats(),loadInvoices()])}
+
+async function loadStats(){
+  try{
+    const d=await(await fetch(API+'/api/stats')).json();
+    document.getElementById('stats').innerHTML=`
+      <div class="stat-card"><div class="l">Totales</div><div class="v">${d.total}</div></div>
+      <div class="stat-card"><div class="l">Payées</div><div class="v green">${d.paid}</div></div>
+      <div class="stat-card"><div class="l">En attente</div><div class="v red">${d.pending}</div></div>
+      <div class="stat-card"><div class="l">Récurrentes</div><div class="v gold">${d.recurring||0}</div></div>
+      <div class="stat-card"><div class="l">Montant total</div><div class="v gold">${d.total_amount.toFixed(2)} DT</div></div>
+      <div class="stat-card"><div class="l">Collecté</div><div class="v green">${d.collected.toFixed(2)} DT</div></div>
+    `;
+  }catch(e){}
+}
+
+async function loadInvoices(){
+  let url=API+'/api/invoices?';
+  if(currentTab==='pending')url+='status=pending&';
+  else if(currentTab==='paid')url+='status=paid&';
+  else if(currentTab==='recurring')url+='recurring=true&';
+  try{
+    invoices=await(await fetch(url)).json();
+    const q=document.getElementById('search').value.toLowerCase();
+    if(q)invoices=invoices.filter(i=>i.client_name.toLowerCase().includes(q)||i.client_phone.includes(q));
+    renderTable();
+  }catch(e){}
+}
+
+function renderTable(){
+  const c=document.getElementById('tableContainer');
+  if(!invoices.length){
+    c.innerHTML='<div class="empty">Aucune facture trouvée</div>';
+    return;
+  }
+  c.innerHTML=`<table><thead><tr>
+    <th>#</th><th>Client</th><th>Téléphone</th><th>Service</th><th>Montant</th><th>Date</th><th>Type</th><th>Statut</th><th>Actions</th>
+  </tr></thead><tbody>${
+    invoices.map(i=>{
+      const isRecurring=i.recurring_days!=null;
+      const freq=i.recurring_days===30?'mois':i.recurring_days===7?'semaine':i.recurring_days===15?'15j':i.recurring_days===90?'3mois':i.recurring_days===365?'an':i.recurring_days+'j';
+      return `<tr>
+        <td>${i.id}</td>
+        <td><strong>${i.client_name}</strong></td>
+        <td>${i.client_phone}</td>
+        <td>${i.service}</td>
+        <td><strong>${i.amount.toFixed(2)} DT</strong></td>
+        <td>${new Date(i.created_at).toLocaleDateString('fr-TN')}</td>
+        <td>${isRecurring?`<span class="badge recurring">🔄 ${freq}</span>`:'—'}</td>
+        <td><span class="badge ${i.status}">${i.status==='paid'?'✅ Payée':'⏳ En attente'}</span></td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="viewPdf(${i.id})">📄</button>
+          ${i.status==='pending'?`<button class="btn btn-green btn-sm" onclick="markPaid(${i.id})">✓</button><button class="btn btn-gold btn-sm" onclick="remind(${i.id})">🔔</button>`:''}
+          <button class="btn btn-outline btn-sm" onclick="shareWsp(${i.id})">📤</button>
+        </td>
+      </tr>`
+    }).join('')
+  }</tbody></table>`;
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  currentTab=tab;
+  loadInvoices();
+}
+
+async function viewPdf(id){window.open(API+'/api/invoice/'+id+'/pdf','_blank')}
+async function markPaid(id){await fetch(API+'/api/invoice/'+id+'/pay',{method:'POST'});loadData()}
+async function remind(id){await fetch(API+'/api/invoice/'+id+'/remind',{method:'POST'});alert('✅ Rappel envoyé')}
+function shareWsp(id){
+  const i=invoices.find(x=>x.id===id);
+  if(!i)return;
+  window.open(`https://wa.me/${i.client_phone}?text=${encodeURIComponent('Bonjour '+i.client_name+', voici votre facture #'+i.id+' de '+i.amount.toFixed(2)+' DT. Merci!')}`,'_blank')
+}
+
+function showModal(){document.getElementById('modal').style.display='flex'}
+function hideModal(){document.getElementById('modal').style.display='none'}
+
+async function createInvoice(){
+  const d={
+    client_name:document.getElementById('fName').value,
+    client_phone:document.getElementById('fPhone').value,
+    service:document.getElementById('fService').value,
+    amount:parseFloat(document.getElementById('fAmount').value),
+    recurring_days:document.getElementById('fRecurring').value||null,
+  };
+  if(!d.client_name||!d.service||!d.amount){alert('Remplissez tous les champs');return}
+  try{
+    const r=await(await fetch(API+'/api/invoice/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})).json();
+    alert('✅ Facture #'+r.invoice_id+' créée!');
+    hideModal();
+    ['fName','fPhone','fService','fAmount'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fRecurring').value='';
+    loadData();
+  }catch(e){alert('❌ Erreur')}
+}
+
+function showSettings() {
+  const current = API;
+  const url = prompt('Adresse du serveur (ex: http://192.168.1.42:8000):', current);
+  if (url && url.trim()) {
+    setApiUrl(url.trim().replace(/\/+$/, ''));
+    loadData();
+  }
+}
+
+loadData();
+setInterval(loadData,30000);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
+</body>
+</html>
