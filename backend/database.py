@@ -30,4 +30,13 @@ class Invoice(Base):
     parent_id = Column(Integer, nullable=True)
     next_id = Column(Integer, nullable=True)
 
+class Expense(Base):
+    __tablename__ = "expenses"
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    amount = Column(Float)
+    category = Column(String, default="Autre")
+    expense_date = Column(DateTime, default=datetime.now)
+    created_at = Column(DateTime, default=datetime.now)
+
 Base.metadata.create_all(bind=engine)

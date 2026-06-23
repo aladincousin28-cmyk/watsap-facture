@@ -1,0 +1,38 @@
+{
+  "cli": {
+    "version": ">= 3.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "APP_ENV": "preview"
+      }
+    },
+    "preview2": {
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal"
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "APP_ENV": "production"
+      },
+      "autoIncrement": true
+    }
+  }
+}

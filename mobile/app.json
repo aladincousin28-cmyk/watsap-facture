@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "Watsap Facture",
+    "slug": "watsap-facture",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "watsapfacture",
+    "platforms": ["android", "ios"],
+    "plugins": [
+      ["expo-splash-screen", {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#0a0a14"
+      }],
+      ["expo-build-properties", {
+        "android": {
+          "compileSdkVersion": 36,
+          "targetSdkVersion": 36,
+          "minSdkVersion": 24,
+          "kotlinVersion": "2.1.20",
+          "enableMinifyInReleaseBuilds": false,
+          "usesCleartextTraffic": true
+        },
+        "ios": {
+          "deploymentTarget": "16.4"
+        }
+      }]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.watsapfacture.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow Watsap Facture to save invoice PDFs to your photo library",
+        "NSFaceIDUsageDescription": "Allow Watsap Facture to use Face ID for app lock"
+      }
+    },
+    "android": {
+      "package": "com.watsapfacture.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0a14",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiUrl": "https://watsap-facture-production.up.railway.app",
+      "eas": {
+        "projectId": "0f3dbb44-396e-4969-8ff3-38cef3d8c0ad"
+      }
+    },
+    "owner": "chi15"
+  }
+}

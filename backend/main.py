@@ -3,7 +3,8 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from datetime import datetime, timedelta
-from database import SessionLocal, Invoice
+from database import SessionLocal, Invoice, Expense
+from sqlalchemy import func, extract
 from invoice_generator import generate_invoice
 import os
 import uvicorn
@@ -186,6 +187,102 @@ def get_stats():
             "total": total, "paid": paid, "pending": pending,
             "recurring": recurring,
             "total_amount": total_amount, "collected": collected,
+        }
+    finally:
+        db.close()
+
+class ExpenseRequest(BaseModel):
+    description: str
+    amount: float
+    category: str = "Autre"
+    expense_date: str | None = None
+
+@app.post("/api/expense/create")
+def create_expense(req: ExpenseRequest):
+    db = SessionLocal()
+    try:
+        date = datetime.strptime(req.expense_date, "%Y-%m-%d") if req.expense_date else datetime.now()
+        exp = Expense(description=req.description, amount=req.amount, category=req.category, expense_date=date)
+        db.add(exp)
+        db.commit()
+        db.refresh(exp)
+        return {"id": exp.id}
+    finally:
+        db.close()
+
+@app.get("/api/expenses")
+def list_expenses(category: str = None, limit: int = 100):
+    db = SessionLocal()
+    try:
+        q = db.query(Expense)
+        if category:
+            q = q.filter(Expense.category == category)
+        expenses = q.order_by(Expense.expense_date.desc()).limit(limit).all()
+        return [{
+            "id": e.id, "description": e.description,
+            "amount": e.amount, "category": e.category,
+            "expense_date": e.expense_date.strftime("%Y-%m-%d"),
+            "created_at": e.created_at.isoformat(),
+        } for e in expenses]
+    finally:
+        db.close()
+
+@app.delete("/api/expense/{expense_id}")
+def delete_expense(expense_id: int):
+    db = SessionLocal()
+    try:
+        exp = db.query(Expense).filter(Expense.id == expense_id).first()
+        if not exp:
+            raise HTTPException(404, "Expense not found")
+        db.delete(exp)
+        db.commit()
+        return {"deleted": True}
+    finally:
+        db.close()
+
+@app.get("/api/charts")
+def get_charts():
+    db = SessionLocal()
+    try:
+        now = datetime.now()
+        months = []
+        revenue = []
+        expenses = []
+        for i in range(5, -1, -1):
+            y = now.year
+            m = now.month - i
+            if m <= 0:
+                m += 12
+                y -= 1
+            months.append(f"{y}-{m:02d}")
+            rev = db.query(func.sum(Invoice.amount)).filter(
+                extract("year", Invoice.created_at) == y,
+                extract("month", Invoice.created_at) == m,
+            ).scalar() or 0
+            exp = db.query(func.sum(Expense.amount)).filter(
+                extract("year", Expense.expense_date) == y,
+                extract("month", Expense.expense_date) == m,
+            ).scalar() or 0
+            revenue.append(round(rev, 3))
+            expenses.append(round(exp, 3))
+        return {"months": months, "revenue": revenue, "expenses": expenses}
+    finally:
+        db.close()
+
+@app.get("/api/expense/stats")
+def expense_stats():
+    db = SessionLocal()
+    try:
+        total_expenses = db.query(func.sum(Expense.amount)).scalar() or 0
+        total_invoiced = db.query(func.sum(Invoice.amount)).scalar() or 0
+        collected = db.query(func.sum(Invoice.amount)).filter(Invoice.status == "paid").scalar() or 0
+        categories = db.query(Expense.category, func.sum(Expense.amount)).group_by(Expense.category).all()
+        return {
+            "total_expenses": round(total_expenses, 3),
+            "total_invoiced": round(total_invoiced, 3),
+            "collected": round(collected, 3),
+            "net_profit": round(collected - total_expenses, 3),
+            "by_category": {cat: round(float(amt), 3) for cat, amt in categories},
         }
     finally:
         db.close()
