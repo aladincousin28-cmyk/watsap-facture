@@ -5,8 +5,5 @@ mobile/node_modules/
 mobile/.expo/
 mobile/android/
 mobile/dist/
-mobile/.metro-health-check*
-whatsapp-bot/
 *.pyc
 __pycache__/
-

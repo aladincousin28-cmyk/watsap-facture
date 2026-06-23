@@ -9,8 +9,14 @@ import os
 import uvicorn
 
 app = FastAPI()
-app.mount("/dashboard", StaticFiles(directory="../dashboard", html=True), name="dashboard")
-app.mount("/invoices", StaticFiles(directory="../invoices"), name="invoices")
+try:
+    app.mount("/dashboard", StaticFiles(directory="../dashboard", html=True), name="dashboard")
+except RuntimeError:
+    pass
+try:
+    app.mount("/invoices", StaticFiles(directory="../invoices"), name="invoices")
+except RuntimeError:
+    pass
 
 class InvoiceRequest(BaseModel):
     client_phone: str
