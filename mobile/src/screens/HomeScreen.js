@@ -77,12 +77,9 @@ export default function HomeScreen({ navigation }) {
   const { width } = useWindowDimensions();
 
   const load = useCallback(async () => {
-    try {
-      const [s, c, es] = await Promise.all([
-        getStats(), getCharts(), getExpenseStats(),
-      ]);
-      setStats(s); setCharts(c); setExpStats(es);
-    } catch (e) { if (e.name === 'ApiError') showToast(e.message, 'error'); }
+    try { setStats(await getStats()); } catch (e) { if (e.name === 'ApiError') showToast(e.message, 'error'); }
+    try { setCharts(await getCharts()); } catch (_) {}
+    try { setExpStats(await getExpenseStats()); } catch (_) {}
   }, []);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));

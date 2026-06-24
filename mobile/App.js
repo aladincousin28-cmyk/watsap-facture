@@ -45,7 +45,7 @@ const NAV_LIGHT = {
 };
 
 const navBarHeight = Platform.OS === 'android'
-  ? Math.max(0, (Dimensions.get('screen').height - Dimensions.get('window').height))
+  ? Math.max(18, (Dimensions.get('screen').height - Dimensions.get('window').height))
   : 0;
 
 export default function App() {
